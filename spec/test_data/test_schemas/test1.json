@@ -1,0 +1,11 @@
+{
+  "title": "test1",
+  "id": "test1",
+
+  "type": "object",
+  "properties": {
+    "ok": { "type": "string" },
+    "correct": { "type": "string" },
+    "not_string": { "type": "integer" }
+  }
+}

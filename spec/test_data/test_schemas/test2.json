@@ -1,0 +1,10 @@
+{
+  "title": "test2",
+  "id": "test2.json",
+
+  "type": "array",
+  "items": {
+    "type": "integer",
+    "minimum": 45
+  }
+}
