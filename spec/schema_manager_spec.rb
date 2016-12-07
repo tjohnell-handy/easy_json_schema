@@ -2,39 +2,43 @@ require 'spec_helper'
 
 describe EasyJsonSchema::SchemaManager do
   describe '#new' do
-    it 'creates a new manager using schemas from a directory' do
-      mgr = EasyJsonSchema::SchemaManager.new(directory: 'spec/test_data/test_schemas')
+    subject { EasyJsonSchema::SchemaManager.new(options).schema_titles }
 
-      expect(mgr.list_schema_titles).to eq ['test1', 'test2', 'test3']
+    context 'single directory option' do
+      let(:options) { { directory: 'spec/test_data/test_schemas' } }
+
+      it { is_expected.to eq ['test1', 'test2', 'test3'] }
+
+      context 'directory with sub-directories containing schemas' do
+        let(:options) { { directory: 'spec/test_data' } }
+
+        it { is_expected.to eq ['test_schema', 'test1', 'test2', 'test3', 'test4', 'test5'] }
+      end
     end
 
-    it 'creates a new manager using schemas from multiple directories' do
-      mgr = EasyJsonSchema::SchemaManager.new(directories: ['spec/test_data/test_schemas', 'spec/test_data/test_schemas2'])
+    context 'directories option' do
+      let(:options) { { directories: ['spec/test_data/test_schemas', 'spec/test_data/test_schemas2'] } }
 
-      expect(mgr.list_schema_titles).to eq ['test1', 'test2', 'test3', 'test4', 'test5']
+      it { is_expected.to eq ['test1', 'test2', 'test3', 'test4', 'test5'] }
     end
 
-    it 'creates a new manager using a schema in a file' do
-      mgr = EasyJsonSchema::SchemaManager.new(file: 'spec/test_data/test_schema.json')
+    context 'file option' do
+      let(:options) { { file: 'spec/test_data/test_schema.json' } }
 
-      expect(mgr.list_schema_titles).to eq ['test_schema']
+      it { is_expected.to eq ['test_schema'] }
     end
   end
 
   describe '#validate_data' do
+    let(:data) { { ok: 'ok', correct: 'correct', not_string: 'a_string' } }
+    subject do
+      EasyJsonSchema::SchemaManager.new(file: 'spec/test_data/test_schemas/test1.json')
+                                   .validate_data('test1', data)
+    end
+
     it 'returns the errors as objects' do
-      mgr = EasyJsonSchema::SchemaManager.new(file: 'spec/test_data/test_schemas/test1.json')
-
-      data = {
-        ok: 'ok',
-        correct: 'correct',
-        not_string: 'a_string'
-      }
-      errors = mgr.validate_data('test1',data)
-
-      expect(errors.count).to eq 1
-
-      expect(errors.first[:message]).to match(/of type String did not match the following type: integer/)
+      expect(subject.count).to eq 1
+      expect(subject.first[:message]).to match(/of type String did not match the following type: integer/)
     end
   end
 end

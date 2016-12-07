@@ -3,41 +3,21 @@ require 'json-schema'
 
 module EasyJsonSchema
   class SchemaManager
-    def initialize(options = {})
-      defaults = {
-        data: nil,
-        file: nil,
-        directory: nil,
-        files: [],
-        directories: []
-      }
-
-      options = defaults.merge(options)
-
+    def initialize(data: nil, file: nil, directory: nil, files: [], directories: [])
       @schema_titles_to_ids = {}
 
-      unless options[:data].nil?
-        initialize_from_data(options[:data])
-      end
+      initialize_from_data(data) unless data.nil?
 
-      unless options[:file].nil?
-        initialize_from_file(options[:file])
-      end
+      initialize_from_file(file) unless file.nil?
 
-      options[:files].each do |filename|
-        initialize_from_file(filename)
-      end
+      files.each { |f| initialize_from_file(f) }
 
-      unless options[:directory].nil?
-        initialize_from_directory(options[:directory])
-      end
+      initialize_from_directory(directory) unless directory.nil?
 
-      options[:directories].each do |directory|
-        initialize_from_directory(directory)
-      end
+      directories.each { |d| initialize_from_directory(d) }
     end
 
-    def list_schema_titles
+    def schema_titles
       @schema_titles_to_ids.keys
     end
 
@@ -55,15 +35,11 @@ module EasyJsonSchema
     private
 
     def initialize_from_directory(directory)
-      schema_files(directory).each do |filename|
-        initialize_from_file(filename)
-      end
+      schema_files(directory).each { |f| initialize_from_file(f) }
     end
 
     def initialize_from_file(filename)
-      schema_data = load_schema_file(filename)
-
-      initialize_from_data(schema_data)
+      initialize_from_data(load_schema_file(filename))
     end
 
     def initialize_from_data(schema_data)
@@ -88,30 +64,33 @@ module EasyJsonSchema
     end
 
     def schema_files(directory)
-      Dir.glob(File.join(directory, '*'))
-         .select { |e|
-           e.end_with?('.json') && File.file?(e)
-         }
+      Dir.glob(File.join(directory, '**/*.json'))
     end
 
     def raise_if_missing_title!(data, filename: nil)
-      message = if filename.nil?
-                  'Schema is missing title attribute'
-                else
-                  "Schema from #{filename} is missing title attribute"
-                end
-
-      raise EasyJsonSchema::MissingSchemaTitle.new(message) if data['title'].nil?
+      if data['title'].nil?
+        raise EasyJsonSchema::MissingSchemaTitle, missing_title_message
+      end
     end
 
     def raise_if_missing_id!(data, filename: nil)
-      message = if filename.nil?
-                  'Schema is missing id attribute'
-                else
-                  "Schema from '#{filename}' is missing id attribute"
-                end
+      raise EasyJsonSchema::MisingSchemaId, message if data['id'].nil?
+    end
 
-      raise EasyJsonSchema::MisingSchemaId.new(message) if data['id'].nil?
+    def missing_title_message(filename)
+      if filename.nil?
+        'Schema is missing title attribute'
+      else
+        "Schema from #{filename} is missing title attribute"
+      end
+    end
+
+    def missing_id_message(filename)
+      if filename.nil?
+        'Schema is missing id attribute'
+      else
+        "Schema from '#{filename}' is missing id attribute"
+      end
     end
   end
 
