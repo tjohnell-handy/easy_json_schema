@@ -6,7 +6,7 @@ require 'easy_json_schema/version'
 Gem::Specification.new do |spec|
   spec.name          = "easy_json_schema"
   spec.version       = EasyJsonSchema::VERSION
-  spec.authors       = ["Nick Donataccio"]
+  spec.authors       = ["S Donataccio"]
   spec.email         = ["ndonataccio@handy.com"]
 
   spec.summary       = "Easy interface to loading and using json schema files"
