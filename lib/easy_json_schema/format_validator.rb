@@ -9,6 +9,10 @@ module EasyJsonSchema
         JSON::Validator.register_format_validator(validator.format_name, object_proc(validator))
       end
 
+      def deregister_format_validator(format_name)
+        JSON::Validator.deregister_format_validator(format_name)
+      end
+
       private
 
       def lambda_proc(f, message)
