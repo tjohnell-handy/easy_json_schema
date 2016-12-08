@@ -29,7 +29,9 @@ module EasyJsonSchema
         )
       end
 
-      JSON::Validator.fully_validate(schema, data, errors_as_objects: true)
+      JSON::Validator.fully_validate(schema, data, errors_as_objects: true).map do |hash|
+        OpenStruct.new(hash)
+      end
     end
 
     private
